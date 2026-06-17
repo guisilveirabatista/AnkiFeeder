@@ -74,7 +74,7 @@ class Feeder:
                     )
                 time.sleep(wait)
 
-    def sync(self, verbose: bool = True) -> SyncResult:
+    def sync(self, verbose: bool = True, drop_active_line: bool = False) -> SyncResult:
         result = SyncResult()
         if not self.config.note_path.exists():
             raise FileNotFoundError(f"Note file not found: {self.config.note_path}")
@@ -84,7 +84,9 @@ class Feeder:
         self.anki.ensure_deck(self.config.deck_name)
 
         text = self.config.note_path.read_text(encoding="utf-8")
-        words = extract_words(text)
+        # While watching, skip the line still being typed (no trailing newline)
+        # so a half-written entry isn't imported before it's finished.
+        words = extract_words(text, drop_unterminated=drop_active_line)
         new_words = [w for w in words if not self.state.has(w)]
 
         if verbose and new_words:

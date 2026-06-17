@@ -12,15 +12,23 @@ _MDLINK = re.compile(r"\[([^\]]+)\]\([^)]*\)")
 _EMPHASIS = re.compile(r"[*_`~]+")
 
 
-def extract_words(text: str) -> list[str]:
+def extract_words(text: str, *, drop_unterminated: bool = False) -> list[str]:
     """Return one cleaned entry per meaningful line, preserving order and de-duping.
 
     Skips blank lines, markdown headings, block quotes, and horizontal rules.
     Strips list markers, links, and emphasis so "- [[ephemeral]]" -> "ephemeral".
+
+    With ``drop_unterminated``, a final line not closed by a newline is treated as
+    still being typed and is skipped, so a half-written entry like "This is a t"
+    isn't imported before you finish it. Pressing Enter (which adds the newline)
+    commits the line on the next scan.
     """
+    lines = text.splitlines()
+    if drop_unterminated and lines and not text.endswith(("\n", "\r")):
+        lines = lines[:-1]
     seen: set[str] = set()
     words: list[str] = []
-    for raw in text.splitlines():
+    for raw in lines:
         line = raw.strip()
         if not line:
             continue

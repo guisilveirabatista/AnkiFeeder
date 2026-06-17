@@ -166,10 +166,13 @@ produces three cards: `ephemeral`, `serendipity`, `gregarious`.
 - **Translation failed?** The word is *not* recorded, so the next run retries it
   (transient API errors won't leave gaps). Each word is also retried up to
   `max_retries` times in place, with exponential backoff (see `retry_backoff`).
-- **Still typing?** After a save is noticed, the watcher waits until the note has
-  been quiet for `settle_delay` seconds (default 10) before syncing, so a sentence
-  you're mid-way through — or a fast Obsidian sync that lands before you finish —
-  isn't picked up half-written. Each new save restarts the timer.
+- **Still typing?** While watching, the line you're currently on — the last line,
+  before you've pressed Enter — is treated as in progress and is *not* imported, so
+  a half-written entry like "This is a t" never becomes a card. Pressing Enter (or
+  starting the next entry) commits the line and it's imported on the next scan. As
+  an extra cushion, after any save the watcher also waits until the note has been
+  quiet for `settle_delay` seconds (default 10) before syncing, which smooths over
+  edits to earlier lines and fast Obsidian syncs landing mid-write.
 - **Stuck after all retries?** While watching, the note is re-scanned every
   `retry_interval` seconds (default 30 min) even if you haven't saved it, so words
   that exhausted their attempts get picked up automatically — no restart needed.

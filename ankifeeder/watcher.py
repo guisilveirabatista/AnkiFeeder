@@ -107,7 +107,7 @@ def _safe_sync(feeder: Feeder, label: str = "", reason: str = "") -> None:
     try:
         # In multi-feed mode, suppress per-word lines (they'd interleave) and
         # just print a prefixed summary instead.
-        result = feeder.sync(verbose=not label)
+        result = feeder.sync(verbose=not label, drop_active_line=True)
         summary = (
             f"Done: {result.added} added, {result.skipped} unchanged, "
             f"{result.failed} failed."
