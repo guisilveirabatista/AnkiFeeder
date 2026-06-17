@@ -110,7 +110,7 @@ class Feeder:
                 self.state.add(word)
                 result.added += 1
                 if verbose:
-                    print(f"  + {word} → {card.result}")
+                    print(f"  + {word} → {'; '.join(s.result for s in card.senses)}")
             except Exception as exc:  # keep going; not recorded, so it retries next run
                 result.failed += 1
                 if verbose:

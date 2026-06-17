@@ -178,3 +178,34 @@ produces three cards: `ephemeral`, `serendipity`, `gregarious`.
   that exhausted their attempts get picked up automatically — no restart needed.
 - **Anki not running / no API key?** You'll get a clear message; while watching,
   errors are logged and the watcher keeps going so it recovers once fixed.
+
+
+Run these — the first line appends this project's bin/ to your PATH:
+
+cd /Users/guilhermesilveirabatista/code/AnkiFeeder
+echo 'export PATH="$PATH:'"$PWD"'/bin"' >> ~/.zshrc
+echo 'export GEMINI_API_KEY=YOUR_KEY_HERE' >> ~/.zshrc   # so the key is always available
+source ~/.zshrc
+
+Commands:
+python3 -m ankifeeder init \b
+python3 -m ankifeeder watch
+ankifeeder watch
+python3 -m ankifeeder sync
+
+ollama run gemma4:e2b --hidethinking
+
+  cd ~/code/AnkiFeeder
+
+  # 1. Recreate the virtualenv and install deps
+  python3 -m venv .venv
+  .venv/bin/pip install -r requirements.txt
+
+  # 2. Add the wrapper's bin/ to your PATH (bash, not zsh)
+  echo 'export PATH="$PATH:$HOME/code/AnkiFeeder/bin"' >> ~/.bashrc
+
+  # 3. Persist your API key (same var as on macOS)
+  echo 'export ANTHROPIC_API_KEY=sk-ant-...' >> ~/.bashrc
+
+  # 4. Reload the shell config
+  source ~/.bashrc
