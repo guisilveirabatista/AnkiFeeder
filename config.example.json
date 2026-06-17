@@ -1,0 +1,23 @@
+{
+  "note_path": "~/Obsidian/Vault/Vocabulary.md",
+  "deck_name": "Obsidian Vocabulary",
+  "anki_connect_url": "http://127.0.0.1:8765",
+  "model_name": "Basic",
+  "translator": "claude",
+  "source_language": "English",
+  "target_language": "Dutch",
+  "claude_model": "claude-opus-4-8",
+  "openai_model": "gpt-4o",
+  "gemini_model": "gemini-2.5-flash",
+  "local_model": "llama3.1",
+  "local_base_url": "http://localhost:11434/v1",
+  "local_api_key": "ollama",
+  "poll_interval": 1.5,
+  "settle_delay": 10.0,
+  "retry_interval": 1800.0,
+  "tag": "ankifeeder",
+  "sync_after_add": true,
+  "request_delay": 2.0,
+  "max_retries": 3,
+  "retry_backoff": 2.0
+}

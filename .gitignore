@@ -1,0 +1,10 @@
+# Local config and run state
+config.json
+.ankifeeder_state.json
+*.ankifeeder_state.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
