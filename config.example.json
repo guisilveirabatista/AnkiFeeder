@@ -13,6 +13,7 @@
   "local_base_url": "http://localhost:11434/v1",
   "local_api_key": "ollama",
   "poll_interval": 1.5,
+  "settle_delay": 10.0,
   "retry_interval": 1800.0,
   "tag": "ankifeeder",
   "sync_after_add": true,

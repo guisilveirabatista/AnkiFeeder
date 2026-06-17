@@ -49,6 +49,7 @@ Open `config.json` and set `note_path` to your Obsidian note. Options:
 | `target_language`  | Language to translate into. Default `Dutch`. Set it equal to `source_language` for definition cards instead of translations. |
 | `claude_model`     | Claude model for translation. Default `claude-opus-4-8`.       |
 | `poll_interval`    | Seconds between checks of the note file while watching.        |
+| `settle_delay`     | After a save is noticed, wait until the note has been quiet this many seconds before syncing, so a sentence you're still writing (or a fast Obsidian sync mid-write) isn't picked up half-finished. Default `10`; `0` syncs as soon as a change lands. |
 | `retry_interval`   | Seconds between forced full re-scans while watching, so words that failed all attempts get retried without re-saving the note. Default `1800` (30 min); `0` disables. |
 | `request_delay`    | Seconds to wait between successive translations (throttling).  |
 | `max_retries`      | Extra attempts on a transient (rate-limit/overload) error.    |
@@ -165,6 +166,10 @@ produces three cards: `ephemeral`, `serendipity`, `gregarious`.
 - **Translation failed?** The word is *not* recorded, so the next run retries it
   (transient API errors won't leave gaps). Each word is also retried up to
   `max_retries` times in place, with exponential backoff (see `retry_backoff`).
+- **Still typing?** After a save is noticed, the watcher waits until the note has
+  been quiet for `settle_delay` seconds (default 10) before syncing, so a sentence
+  you're mid-way through — or a fast Obsidian sync that lands before you finish —
+  isn't picked up half-written. Each new save restarts the timer.
 - **Stuck after all retries?** While watching, the note is re-scanned every
   `retry_interval` seconds (default 30 min) even if you haven't saved it, so words
   that exhausted their attempts get picked up automatically — no restart needed.

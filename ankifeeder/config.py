@@ -48,6 +48,10 @@ class Config:
     state_path: Path = Path(".ankifeeder_state.json")
     # Seconds between checks of the note file when watching.
     poll_interval: float = 1.5
+    # After a change is noticed, wait until the file has been quiet for this many
+    # seconds before syncing, so a sentence still being written (or mid-sync from
+    # Obsidian) isn't picked up half-finished. 0 syncs as soon as a change lands.
+    settle_delay: float = 10.0
     # Seconds between forced full re-scans while watching, so words that failed
     # all their attempts get retried without saving the file again. 0 disables.
     retry_interval: float = 1800.0  # 30 minutes
@@ -134,6 +138,7 @@ class Config:
             local_api_key=data.get("local_api_key", cls.local_api_key),
             state_path=_resolve(base, data.get("state_path", default_state)),
             poll_interval=float(data.get("poll_interval", cls.poll_interval)),
+            settle_delay=float(data.get("settle_delay", cls.settle_delay)),
             retry_interval=float(data.get("retry_interval", cls.retry_interval)),
             tag=data.get("tag", cls.tag),
             sync_after_add=bool(data.get("sync_after_add", cls.sync_after_add)),

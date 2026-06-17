@@ -52,22 +52,46 @@ def watch_many(feeders: list[Feeder]) -> None:
         stop.set()
 
 
+def _log(msg: str, label: str = "") -> None:
+    """Print a timestamped, optionally feed-prefixed status line."""
+    prefix = f"[{label}] " if label else ""
+    print(f"{time.strftime('%H:%M:%S')} {prefix}{msg}", flush=True)
+
+
 def _watch_loop(feeder: Feeder, stop: threading.Event, label: str = "") -> None:
     # Sync once at startup so existing entries are caught up.
-    _safe_sync(feeder, label)
+    _safe_sync(feeder, label, reason="startup")
     last_mtime = _mtime(feeder.config.note_path)
     last_sync = time.monotonic()
     retry_interval = feeder.config.retry_interval
+    settle_delay = feeder.config.settle_delay
+    # Monotonic time of the most recent unsynced change; None when nothing pending.
+    pending_since: float | None = None
+    parts = [f"checking every {feeder.config.poll_interval:g}s"]
+    if settle_delay > 0:
+        parts.append(f"settling {settle_delay:g}s after edits")
+    if retry_interval > 0:
+        parts.append(f"re-scanning every {retry_interval:g}s")
+    _log(f"Watching for saves ({', '.join(parts)}).", label)
     while not stop.wait(feeder.config.poll_interval):
         current = _mtime(feeder.config.note_path)
-        changed = current != last_mtime
-        # Periodically re-scan even without a save, so words that exhausted their
-        # retries (and so weren't recorded in state) get another chance.
-        due = retry_interval > 0 and (time.monotonic() - last_sync) >= retry_interval
-        if changed or due:
+        now = time.monotonic()
+        if current != last_mtime:
+            # A save landed. Don't sync yet: (re)start the settle timer so an
+            # in-progress sentence — or a fast Obsidian sync mid-write — has time
+            # to finish before we read it.
             last_mtime = current
-            last_sync = time.monotonic()
-            _safe_sync(feeder, label)
+            if pending_since is None and settle_delay > 0:
+                _log(f"Change detected; waiting {settle_delay:g}s for edits to settle…", label)
+            pending_since = now
+        # Sync once edits have been quiet for settle_delay, or on the periodic
+        # re-scan so words that exhausted their retries get another chance.
+        settled = pending_since is not None and (now - pending_since) >= settle_delay
+        due = retry_interval > 0 and (now - last_sync) >= retry_interval
+        if settled or due:
+            pending_since = None
+            last_sync = now
+            _safe_sync(feeder, label, reason="file changed" if settled else "periodic re-scan")
 
 
 def _mtime(path) -> float | None:
@@ -77,17 +101,18 @@ def _mtime(path) -> float | None:
         return None
 
 
-def _safe_sync(feeder: Feeder, label: str = "") -> None:
-    prefix = f"[{label}] " if label else ""
+def _safe_sync(feeder: Feeder, label: str = "", reason: str = "") -> None:
+    why = f" ({reason})" if reason else ""
+    _log(f"Syncing{why}…", label)
     try:
         # In multi-feed mode, suppress per-word lines (they'd interleave) and
         # just print a prefixed summary instead.
         result = feeder.sync(verbose=not label)
-        if result.added and label:
-            extra = f", {result.failed} failed" if result.failed else ""
-            print(f"{prefix}Added {result.added} card(s){extra}.")
-        elif result.added:
-            print(f"Added {result.added} card(s).")
+        summary = (
+            f"Done: {result.added} added, {result.skipped} unchanged, "
+            f"{result.failed} failed."
+        )
+        _log(summary, label)
     except Exception as exc:
         # Never let a transient error (Anki closed, network blip) kill the watcher.
-        print(f"{prefix}Sync error: {exc}")
+        _log(f"Sync error: {exc}", label)
