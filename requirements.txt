@@ -1,0 +1,6 @@
+# Translator backends. You only need the package matching your `translator`
+# config setting; the other import is lazy and never loaded.
+# The rest of AnkiFeeder uses the Python standard library.
+anthropic>=0.69      # translator: "claude"
+openai>=1.40         # translator: "openai"
+google-genai>=0.3    # translator: "gemini"

@@ -1,0 +1,36 @@
+#!/bin/sh
+# Launch AnkiFeeder from any directory.
+#
+# Make it available everywhere by adding this folder to your PATH, e.g. in
+# ~/.zshrc:
+#     export PATH="$PATH:/Users/you/code/AnkiFeeder/bin"
+# Then run `ankifeeder watch` (or `sync`) from anywhere.
+#
+# It uses the project's virtualenv and its config.json, regardless of where you
+# call it from.
+
+# Resolve the project directory (the folder containing this bin/ script).
+DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PYTHON="$DIR/.venv/bin/python"
+
+if [ ! -x "$PYTHON" ]; then
+  echo "AnkiFeeder: virtualenv not found at $PYTHON" >&2
+  echo "Create it with: python3 -m venv \"$DIR/.venv\" && \"$DIR/.venv/bin/pip\" install -r \"$DIR/requirements.txt\"" >&2
+  exit 1
+fi
+
+# If the caller passed their own -c/--config, respect it; otherwise default to
+# the project's config.json. (Lets you run `ankifeeder -c other.json watch`.)
+has_config=0
+for arg in "$@"; do
+  case "$arg" in
+    -c | --config | -c* | --config=*) has_config=1 ;;
+  esac
+done
+
+# PYTHONPATH makes the package importable from any CWD.
+if [ "$has_config" -eq 1 ]; then
+  exec env PYTHONPATH="$DIR${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m ankifeeder "$@"
+else
+  exec env PYTHONPATH="$DIR${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m ankifeeder -c "$DIR/config.json" "$@"
+fi
