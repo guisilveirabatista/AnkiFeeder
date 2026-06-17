@@ -12,8 +12,8 @@ def watch(feeder: Feeder) -> None:
     """Watch a single feed in the foreground."""
     print(
         f"Watching {feeder.config.note_path} (deck: {feeder.config.deck_name}). "
-        f"Translating with {feeder.config.translator} ({feeder.config.active_model()}). "
-        "Press Ctrl+C to stop."
+        f"{feeder.config.language_summary()} via {feeder.config.translator} "
+        f"({feeder.config.active_model()}). Press Ctrl+C to stop."
     )
     stop = threading.Event()
     try:
@@ -31,7 +31,7 @@ def watch_many(feeders: list[Feeder]) -> None:
     for f in feeders:
         print(
             f"Watching {f.config.note_path} → deck '{f.config.deck_name}' "
-            f"({f.config.translator}: {f.config.active_model()})"
+            f"[{f.config.language_summary()}, {f.config.translator}: {f.config.active_model()}]"
         )
     print(f"{len(feeders)} feeds running. Press Ctrl+C to stop.")
 

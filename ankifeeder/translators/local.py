@@ -6,12 +6,13 @@ pointed at a local `base_url`. No data leaves your machine.
 
 from __future__ import annotations
 
-from .base import Card, SYSTEM_PROMPT, TranslatorError
+from .base import Card, TranslatorError
 
 
 class LocalTranslator:
-    def __init__(self, model: str, base_url: str, api_key: str = "ollama"):
+    def __init__(self, model: str, base_url: str, system_prompt: str, api_key: str = "ollama"):
         self.model = model
+        self.system_prompt = system_prompt
         try:
             import openai
         except ImportError as exc:  # pragma: no cover - depends on environment
@@ -31,7 +32,7 @@ class LocalTranslator:
         completion = self.client.chat.completions.parse(
             model=self.model,
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": text},
             ],
             response_format=Card,

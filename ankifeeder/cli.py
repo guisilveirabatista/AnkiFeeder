@@ -16,6 +16,8 @@ CONFIG_TEMPLATE = """{
   "anki_connect_url": "http://127.0.0.1:8765",
   "model_name": "Basic",
   "translator": "claude",
+  "source_language": "English",
+  "target_language": "Dutch",
   "claude_model": "claude-opus-4-8",
   "openai_model": "gpt-4o",
   "gemini_model": "gemini-2.5-flash",
@@ -65,8 +67,8 @@ def main(argv: list[str] | None = None) -> int:
         for feeder in feeders:
             label = f"[{feeder.config.deck_name}] " if len(feeders) > 1 else ""
             print(
-                f"{label}Translating with {feeder.config.translator} "
-                f"({feeder.config.active_model()})."
+                f"{label}{feeder.config.language_summary()} via "
+                f"{feeder.config.translator} ({feeder.config.active_model()})."
             )
             try:
                 result = feeder.sync()

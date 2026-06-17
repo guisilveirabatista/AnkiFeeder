@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from .base import Card, SYSTEM_PROMPT, TranslatorError
+from .base import Card, TranslatorError
 
 
 class ClaudeTranslator:
-    def __init__(self, model: str):
+    def __init__(self, model: str, system_prompt: str):
         self.model = model
+        self.system_prompt = system_prompt
         try:
             import anthropic
         except ImportError as exc:  # pragma: no cover - depends on environment
@@ -28,7 +29,7 @@ class ClaudeTranslator:
         response = self.client.messages.parse(
             model=self.model,
             max_tokens=1024,
-            system=SYSTEM_PROMPT,
+            system=self.system_prompt,
             messages=[{"role": "user", "content": text}],
             output_format=Card,
         )

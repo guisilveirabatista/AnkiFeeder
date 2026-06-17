@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from .base import Card, SYSTEM_PROMPT, TranslatorError
+from .base import Card, TranslatorError
 
 
 class OpenAITranslator:
-    def __init__(self, model: str):
+    def __init__(self, model: str, system_prompt: str):
         self.model = model
+        self.system_prompt = system_prompt
         try:
             import openai
         except ImportError as exc:  # pragma: no cover - depends on environment
@@ -28,7 +29,7 @@ class OpenAITranslator:
         completion = self.client.chat.completions.parse(
             model=self.model,
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": text},
             ],
             response_format=Card,

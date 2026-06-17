@@ -4,6 +4,8 @@
   "anki_connect_url": "http://127.0.0.1:8765",
   "model_name": "Basic",
   "translator": "claude",
+  "source_language": "English",
+  "target_language": "Dutch",
   "claude_model": "claude-opus-4-8",
   "openai_model": "gpt-4o",
   "gemini_model": "gemini-2.5-flash",

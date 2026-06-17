@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from .base import Card, SYSTEM_PROMPT, TranslatorError
+from .base import Card, TranslatorError
 
 
 class GeminiTranslator:
-    def __init__(self, model: str):
+    def __init__(self, model: str, system_prompt: str):
         self.model = model
+        self.system_prompt = system_prompt
         try:
             from google import genai
         except ImportError as exc:  # pragma: no cover - depends on environment
@@ -30,7 +31,7 @@ class GeminiTranslator:
             model=self.model,
             contents=text,
             config={
-                "system_instruction": SYSTEM_PROMPT,
+                "system_instruction": self.system_prompt,
                 "response_mime_type": "application/json",
                 "response_schema": Card,
             },

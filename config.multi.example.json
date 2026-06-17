@@ -2,18 +2,22 @@
   "translator": "gemini",
   "gemini_model": "gemini-2.5-flash-lite",
   "request_delay": 2.0,
+  "source_language": "English",
+  "target_language": "Dutch",
   "feeds": [
     {
       "note_path": "~/Documents/Obsidian Vault/dutch/vocab.md",
       "deck_name": "Dutch::Vocabulary"
     },
     {
-      "note_path": "~/Documents/Obsidian Vault/dutch/expressions.md",
-      "deck_name": "Dutch::Expressions"
+      "note_path": "~/Documents/Obsidian Vault/french/vocab.md",
+      "deck_name": "French::Vocabulary",
+      "target_language": "French"
     },
     {
-      "note_path": "~/Documents/Obsidian Vault/french/vocab.md",
-      "deck_name": "French::Vocabulary"
+      "note_path": "~/Documents/Obsidian Vault/english/words.md",
+      "deck_name": "English::Definitions",
+      "target_language": "English"
     }
   ]
 }

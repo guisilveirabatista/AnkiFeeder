@@ -28,6 +28,11 @@ class Config:
     model_name: str = "Basic"
     # Which translator backend to use: "claude", "openai", "gemini", or "local".
     translator: str = "claude"
+    # Language of the words in the note, and the language to translate them into.
+    # Set them to the same language (e.g. both "English") to get a definition
+    # card instead of a translation.
+    source_language: str = "English"
+    target_language: str = "Dutch"
     # Claude model used when translator == "claude".
     claude_model: str = "claude-opus-4-8"
     # OpenAI model used when translator == "openai".
@@ -63,6 +68,12 @@ class Config:
             "gemini": self.gemini_model,
             "local": self.local_model,
         }.get(self.translator, "unknown")
+
+    def language_summary(self) -> str:
+        """A short human-readable description of the language direction."""
+        if self.source_language.strip().lower() == self.target_language.strip().lower():
+            return f"{self.source_language} definitions"
+        return f"{self.source_language} → {self.target_language}"
 
     @classmethod
     def load_all(cls, path: Path = DEFAULT_CONFIG_PATH) -> list["Config"]:
@@ -113,6 +124,8 @@ class Config:
             anki_connect_url=data.get("anki_connect_url", cls.anki_connect_url),
             model_name=data.get("model_name", cls.model_name),
             translator=data.get("translator", cls.translator),
+            source_language=data.get("source_language", cls.source_language),
+            target_language=data.get("target_language", cls.target_language),
             claude_model=data.get("claude_model", cls.claude_model),
             openai_model=data.get("openai_model", cls.openai_model),
             gemini_model=data.get("gemini_model", cls.gemini_model),

@@ -100,13 +100,15 @@ class Feeder:
                     deck_name=self.config.deck_name,
                     model_name=self.config.model_name,
                     front=word,
-                    back=render_back(card),
+                    back=render_back(
+                        card, self.config.source_language, self.config.target_language
+                    ),
                     tags=[self.config.tag],
                 )
                 self.state.add(word)
                 result.added += 1
                 if verbose:
-                    print(f"  + {word} → {card.translation}")
+                    print(f"  + {word} → {card.result}")
             except Exception as exc:  # keep going; not recorded, so it retries next run
                 result.failed += 1
                 if verbose:
