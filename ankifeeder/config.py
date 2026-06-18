@@ -59,6 +59,9 @@ class Config:
     tag: str = "ankifeeder"
     # Sync the desktop app with AnkiWeb after a run that added cards.
     sync_after_add: bool = True
+    # Rewrite the note on each sync to drop duplicate entries, keeping the first
+    # of each. Tidies a note where the same word was added more than once.
+    dedup_note: bool = True
     # Throttling + retries — help when a remote model is rate-limited or busy.
     request_delay: float = 2.0  # seconds to wait between successive translations
     max_retries: int = 3  # extra attempts on a transient (rate-limit/overload) error
@@ -142,6 +145,7 @@ class Config:
             retry_interval=float(data.get("retry_interval", cls.retry_interval)),
             tag=data.get("tag", cls.tag),
             sync_after_add=bool(data.get("sync_after_add", cls.sync_after_add)),
+            dedup_note=bool(data.get("dedup_note", cls.dedup_note)),
             request_delay=float(data.get("request_delay", cls.request_delay)),
             max_retries=int(data.get("max_retries", cls.max_retries)),
             retry_backoff=float(data.get("retry_backoff", cls.retry_backoff)),

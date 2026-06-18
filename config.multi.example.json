@@ -10,6 +10,7 @@
   "poll_interval": 1.5,
   "settle_delay": 10.0,
   "tag": "ankifeeder",
+  "dedup_note": true,
     "feeds": [
     {
       "note_path": "~/Documents/Obsidian Vault/languages/dutch/Nederlands.md",

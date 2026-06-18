@@ -55,6 +55,7 @@ Open `config.json` and set `note_path` to your Obsidian note. Options:
 | `max_retries`      | Extra attempts on a transient (rate-limit/overload) error.    |
 | `retry_backoff`    | Base seconds for exponential backoff between those attempts.   |
 | `tag`              | Tag applied to every card AnkiFeeder creates.                  |
+| `dedup_note`       | Rewrite the note on each sync to drop duplicate entries, keeping the first of each, so re-adding a word you already have just tidies it away. Default `true`; set `false` to leave the note untouched. |
 
 The API key is read from an environment variable — it is never stored in
 `config.json`.

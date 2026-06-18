@@ -108,9 +108,14 @@ def _safe_sync(feeder: Feeder, label: str = "", reason: str = "") -> None:
         # In multi-feed mode, suppress per-word lines (they'd interleave) and
         # just print a prefixed summary instead.
         result = feeder.sync(verbose=not label, drop_active_line=True)
+        dedup = (
+            f", {result.duplicates_removed} duplicates removed"
+            if result.duplicates_removed
+            else ""
+        )
         summary = (
             f"Done: {result.added} added, {result.skipped} unchanged, "
-            f"{result.failed} failed."
+            f"{result.failed} failed{dedup}."
         )
         _log(summary, label)
     except Exception as exc:

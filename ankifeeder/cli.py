@@ -29,6 +29,7 @@ CONFIG_TEMPLATE = """{
   "retry_interval": 1800.0,
   "tag": "ankifeeder",
   "sync_after_add": true,
+  "dedup_note": true,
   "request_delay": 2.0,
   "max_retries": 3,
   "retry_backoff": 2.0
@@ -76,9 +77,14 @@ def main(argv: list[str] | None = None) -> int:
             except Exception as exc:
                 print(f"{label}Error: {exc}", file=sys.stderr)
                 continue
+            extra = (
+                f" deduped={result.duplicates_removed}"
+                if result.duplicates_removed
+                else ""
+            )
             print(
                 f"{label}Done. added={result.added} skipped={result.skipped} "
-                f"failed={result.failed}"
+                f"failed={result.failed}{extra}"
             )
         return 0
 

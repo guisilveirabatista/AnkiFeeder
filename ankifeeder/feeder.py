@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from .anki import AnkiConnect
 from .config import Config
-from .parser import extract_words
+from .parser import dedup_text, extract_words
 from .state import State
 from .translators import Translator, make_translator, render_back
 
@@ -40,6 +40,7 @@ class SyncResult:
     added: int = 0
     skipped: int = 0  # already added in a previous run
     failed: int = 0  # translation or Anki error — will be retried next run
+    duplicates_removed: int = 0  # duplicate lines cleaned from the note file
 
 
 class Feeder:
@@ -84,6 +85,20 @@ class Feeder:
         self.anki.ensure_deck(self.config.deck_name)
 
         text = self.config.note_path.read_text(encoding="utf-8")
+        # Clean repeated words out of the note itself so a long list doesn't grow
+        # duplicates when the same word is added again. The line still being typed
+        # (no trailing newline) is left alone, same as below.
+        if self.config.dedup_note:
+            deduped, removed = dedup_text(text, keep_unterminated=drop_active_line)
+            if removed:
+                self.config.note_path.write_text(deduped, encoding="utf-8")
+                text = deduped
+                result.duplicates_removed = removed
+                if verbose:
+                    print(
+                        f"Removed {removed} duplicate line(s) from "
+                        f"{self.config.note_path.name}."
+                    )
         # While watching, skip the line still being typed (no trailing newline)
         # so a half-written entry isn't imported before it's finished.
         words = extract_words(text, drop_unterminated=drop_active_line)

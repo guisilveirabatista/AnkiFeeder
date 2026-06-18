@@ -17,6 +17,7 @@
   "retry_interval": 1800.0,
   "tag": "ankifeeder",
   "sync_after_add": true,
+  "dedup_note": true,
   "request_delay": 2.0,
   "max_retries": 3,
   "retry_backoff": 2.0
