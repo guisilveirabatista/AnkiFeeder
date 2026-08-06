@@ -3,6 +3,77 @@
 Watch an Obsidian note and automatically turn each word in it into an Anki
 flashcard, complete with its translation (or definition) and example sentences.
 
+## Docker (Anki + Obsidian + AnkiFeeder)
+
+A single container runs **Anki** (with AnkiConnect), **Obsidian**, and
+**AnkiFeeder**, with a browser desktop (noVNC) so you can use both GUIs and
+configure accounts.
+
+```bash
+cp .env.example .env
+# Edit .env: ANKIWEB_*, OBSIDIAN_*, and the translator API key for TRANSLATOR
+mkdir -p vault
+docker compose up -d --build
+```
+
+| Service        | URL / port                         |
+| -------------- | ---------------------------------- |
+| Desktop (GUIs) | http://localhost:6080/vnc.html     |
+| Raw VNC        | localhost:5900                     |
+| AnkiConnect    | http://localhost:8765              |
+
+### Account configuration
+
+**AnkiWeb** — set in `.env`:
+
+```env
+ANKIWEB_EMAIL=you@example.com
+ANKIWEB_PASSWORD=secret
+```
+
+A small bundled add-on signs in on first start and stores the session in the
+`anki-data` volume. You can also log in manually in the noVNC desktop
+(Anki → sync / Preferences). Set `ANKIWEB_SYNC_ON_LOGIN=0` to skip the
+automatic first sync.
+
+**Obsidian** — there is no supported non-interactive login API for Obsidian
+Sync. Set credentials in `.env` for a reminder note on the desktop:
+
+```env
+OBSIDIAN_EMAIL=you@example.com
+OBSIDIAN_PASSWORD=secret
+```
+
+Then open http://localhost:6080/vnc.html → Obsidian → **Settings → Account**
+(or **Sync**) and sign in once. The `obsidian-config` volume keeps the session.
+
+Mount your real vault (or use the seeded `./vault`):
+
+```env
+OBSIDIAN_VAULT_HOST=./vault
+NOTE_PATH=/vault/Vocabulary.md
+```
+
+**Translator** — set the key that matches `TRANSLATOR` (`gemini`, `claude`,
+`openai`, or `local`):
+
+```env
+TRANSLATOR=gemini
+GEMINI_API_KEY=...
+```
+
+If you already have a multi-feed `config.json`, mount or copy it into the
+`ankifeeder-data` volume at `/data/ankifeeder/config.json` (the entrypoint only
+writes a default when that file is missing).
+
+Useful commands:
+
+```bash
+docker compose logs -f ankifeeder    # AnkiFeeder + stack logs via supervisor files
+docker compose exec ankifeeder bash
+docker compose down                  # stop (volumes keep Anki/Obsidian state)
+```
+
 - **Input:** a markdown note in your Obsidian vault, one word (or phrase) per line,
   written in your configured `source_language`.
 - **Output:** a "Basic" card in your chosen Anki deck — **Front** = the word,

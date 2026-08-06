@@ -3,6 +3,10 @@ config.json
 .ankifeeder_state.json
 *.ankifeeder_state.json
 
+# Docker local overrides / vault mount
+.env
+vault/
+
 # Python
 __pycache__/
 *.py[cod]

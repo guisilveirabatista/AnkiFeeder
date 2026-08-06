@@ -1,0 +1,14 @@
+.git
+.venv
+venv
+__pycache__
+*.py[cod]
+*.ankifeeder_state.json
+.ankifeeder_state*.json
+config.json
+vault
+.env
+*.md
+!README.md
+!config.example.json
+!config.multi.example.json

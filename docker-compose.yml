@@ -1,0 +1,69 @@
+# AnkiFeeder + Anki + Obsidian
+#
+#   cp .env.example .env   # fill in accounts + API keys
+#   docker compose up -d --build
+#   open http://localhost:6080/vnc.html
+#
+services:
+  ankifeeder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ANKI_VERSION: ${ANKI_VERSION:-26.08}
+        OBSIDIAN_VERSION: ${OBSIDIAN_VERSION:-1.13.4}
+    image: ankifeeder:local
+    container_name: ankifeeder
+    restart: unless-stopped
+    ports:
+      - "${NOVNC_HOST_PORT:-6080}:6080"   # browser desktop (Anki + Obsidian)
+      - "${VNC_HOST_PORT:-5900}:5900"     # raw VNC (optional)
+      - "${ANKICONNECT_HOST_PORT:-8765}:8765"  # AnkiConnect API
+    environment:
+      # Desktop
+      RESOLUTION: ${RESOLUTION:-1920x1080}
+      VNC_PASSWORD: ${VNC_PASSWORD:-}
+
+      # AnkiWeb account (consumed by the ankiweb_login add-on)
+      ANKIWEB_EMAIL: ${ANKIWEB_EMAIL:-}
+      ANKIWEB_PASSWORD: ${ANKIWEB_PASSWORD:-}
+      ANKIWEB_SYNC_ON_LOGIN: ${ANKIWEB_SYNC_ON_LOGIN:-1}
+
+      # Obsidian account (reminder + desktop note; sign-in is via the GUI once)
+      OBSIDIAN_EMAIL: ${OBSIDIAN_EMAIL:-}
+      OBSIDIAN_PASSWORD: ${OBSIDIAN_PASSWORD:-}
+      OBSIDIAN_VAULT: /vault
+
+      # AnkiFeeder / translator
+      TRANSLATOR: ${TRANSLATOR:-gemini}
+      NOTE_PATH: ${NOTE_PATH:-/vault/Vocabulary.md}
+      DECK_NAME: ${DECK_NAME:-Obsidian Vocabulary}
+      SOURCE_LANGUAGE: ${SOURCE_LANGUAGE:-English}
+      TARGET_LANGUAGE: ${TARGET_LANGUAGE:-Dutch}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-opus-4-8}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash-lite}
+      LOCAL_MODEL: ${LOCAL_MODEL:-llama3.1}
+      LOCAL_BASE_URL: ${LOCAL_BASE_URL:-http://host.docker.internal:11434/v1}
+      LOCAL_API_KEY: ${LOCAL_API_KEY:-ollama}
+    volumes:
+      # Persist Anki profile, decks, and add-on state (including AnkiWeb session)
+      - anki-data:/data/anki
+      # Persist AnkiFeeder config + word state files
+      - ankifeeder-data:/data/ankifeeder
+      # Your Obsidian vault (mount a host folder to edit notes from outside)
+      - ${OBSIDIAN_VAULT_HOST:-./vault}:/vault
+      # Persist Obsidian app settings / account after GUI login
+      - obsidian-config:/home/app/.config/obsidian
+    # Needed so LOCAL_BASE_URL can reach Ollama (or other services) on the host
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    shm_size: "1gb"
+
+volumes:
+  anki-data:
+  ankifeeder-data:
+  obsidian-config:

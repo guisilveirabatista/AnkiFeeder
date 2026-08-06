@@ -1,0 +1,9 @@
+{
+  "package": "ankiweb_login",
+  "name": "AnkiWeb Env Login",
+  "mod": 0,
+  "min_point_version": 50,
+  "max_point_version": 0,
+  "branch_index": 0,
+  "disabled": false
+}
