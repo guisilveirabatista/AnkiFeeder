@@ -179,42 +179,15 @@ EOF
 fi
 
 # ---------------------------------------------------------------------------
-# AnkiFeeder config (generate from env if missing)
+# AnkiFeeder config (always install the image / bind-mounted config.json)
 # ---------------------------------------------------------------------------
-if [[ ! -f "$ANKIFEEDER_CONFIG" ]]; then
-  log "Writing AnkiFeeder config → $ANKIFEEDER_CONFIG"
-  NOTE_PATH="${NOTE_PATH:-$OBSIDIAN_VAULT/Vocabulary.md}"
-  # Expand a leading ~ if the user passed one
-  NOTE_PATH="${NOTE_PATH/#\~/$HOME}"
-  cat > "$ANKIFEEDER_CONFIG" <<EOF
-{
-  "note_path": "${NOTE_PATH}",
-  "deck_name": "${DECK_NAME:-Obsidian Vocabulary}",
-  "anki_connect_url": "${ANKI_CONNECT_URL:-http://127.0.0.1:8765}",
-  "model_name": "${MODEL_NAME:-Basic}",
-  "translator": "${TRANSLATOR:-claude}",
-  "source_language": "${SOURCE_LANGUAGE:-English}",
-  "target_language": "${TARGET_LANGUAGE:-Dutch}",
-  "claude_model": "${CLAUDE_MODEL:-claude-opus-4-8}",
-  "openai_model": "${OPENAI_MODEL:-gpt-4o}",
-  "gemini_model": "${GEMINI_MODEL:-gemini-2.5-flash}",
-  "local_model": "${LOCAL_MODEL:-llama3.1}",
-  "local_base_url": "${LOCAL_BASE_URL:-http://host.docker.internal:11434/v1}",
-  "local_api_key": "${LOCAL_API_KEY:-ollama}",
-  "poll_interval": ${POLL_INTERVAL:-1.5},
-  "settle_delay": ${SETTLE_DELAY:-10.0},
-  "retry_interval": ${RETRY_INTERVAL:-1800.0},
-  "tag": "${TAG:-ankifeeder}",
-  "sync_after_add": ${SYNC_AFTER_ADD:-true},
-  "dedup_note": ${DEDUP_NOTE:-true},
-  "request_delay": ${REQUEST_DELAY:-2.0},
-  "max_retries": ${MAX_RETRIES:-3},
-  "retry_backoff": ${RETRY_BACKOFF:-2.0}
-}
-EOF
-else
-  log "Using existing AnkiFeeder config at $ANKIFEEDER_CONFIG"
+CONFIG_SRC="${ANKIFEEDER_HOME}/config.json"
+if [[ ! -f "$CONFIG_SRC" ]]; then
+  log "Error: $CONFIG_SRC is missing; COPY config.json into the image"
+  exit 1
 fi
+cp "$CONFIG_SRC" "$ANKIFEEDER_CONFIG"
+log "Installed AnkiFeeder config $CONFIG_SRC → $ANKIFEEDER_CONFIG"
 
 # Export for child processes / supervisord programs
 export ANKI_BASE OBSIDIAN_VAULT ANKIFEEDER_CONFIG ANKIFEEDER_HOME

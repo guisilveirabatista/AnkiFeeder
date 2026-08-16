@@ -51,20 +51,19 @@ Mount your real vault (or use the seeded `./vault`):
 
 ```env
 OBSIDIAN_VAULT_HOST=./vault
-NOTE_PATH=/vault/Vocabulary.md
 ```
 
-**Translator** — set the key that matches `TRANSLATOR` (`gemini`, `claude`,
-`openai`, or `local`):
+Feeds, note paths, translator, and models come from `./config.json`. The
+container copies that file to `/data/ankifeeder/config.json` on every start.
+Inside the container the vault is `/vault`, so `note_path` values must be
+container paths (for example `/vault/Vocabulary.md`), not host `~` paths.
+
+**Translator** — set the key that matches `translator` in `config.json`
+(`gemini`, `claude`, `openai`, or `local`):
 
 ```env
-TRANSLATOR=gemini
 GEMINI_API_KEY=...
 ```
-
-If you already have a multi-feed `config.json`, mount or copy it into the
-`ankifeeder-data` volume at `/data/ankifeeder/config.json` (the entrypoint only
-writes a default when that file is missing).
 
 Useful commands:
 

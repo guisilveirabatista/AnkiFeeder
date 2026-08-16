@@ -34,26 +34,17 @@ services:
       OBSIDIAN_PASSWORD: ${OBSIDIAN_PASSWORD:-}
       OBSIDIAN_VAULT: /vault
 
-      # AnkiFeeder / translator
-      TRANSLATOR: ${TRANSLATOR:-gemini}
-      NOTE_PATH: ${NOTE_PATH:-/vault/Vocabulary.md}
-      DECK_NAME: ${DECK_NAME:-Obsidian Vocabulary}
-      SOURCE_LANGUAGE: ${SOURCE_LANGUAGE:-English}
-      TARGET_LANGUAGE: ${TARGET_LANGUAGE:-Dutch}
+      # Translator API keys (the rest of AnkiFeeder settings live in config.json)
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-opus-4-8}
-      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash-lite}
-      LOCAL_MODEL: ${LOCAL_MODEL:-llama3.1}
-      LOCAL_BASE_URL: ${LOCAL_BASE_URL:-http://host.docker.internal:11434/v1}
-      LOCAL_API_KEY: ${LOCAL_API_KEY:-ollama}
     volumes:
       # Persist Anki profile, decks, and add-on state (including AnkiWeb session)
       - anki-data:/data/anki
-      # Persist AnkiFeeder config + word state files
+      # Persist AnkiFeeder word state files (config.json is copied in on each start)
       - ankifeeder-data:/data/ankifeeder
+      # Live config: entrypoint copies this to /data/ankifeeder/config.json
+      - ./config.json:/app/ankifeeder/config.json:ro
       # Your Obsidian vault (mount a host folder to edit notes from outside)
       - ${OBSIDIAN_VAULT_HOST:-./vault}:/vault
       # Persist Obsidian app settings / account after GUI login
