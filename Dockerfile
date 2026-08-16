@@ -132,7 +132,12 @@ COPY config.json ./
 # ---------------------------------------------------------------------------
 # Runtime user, dirs, supervisor + entrypoint
 # ---------------------------------------------------------------------------
-RUN useradd -m -u 1000 -s /bin/bash app \
+# ubuntu:24.04 already ships a UID 1000 user named "ubuntu".
+RUN if id -u ubuntu >/dev/null 2>&1; then \
+      usermod -l app ubuntu && groupmod -n app ubuntu && usermod -d /home/app -m app; \
+    elif ! id -u app >/dev/null 2>&1; then \
+      useradd -m -u 1000 -s /bin/bash app; \
+    fi \
     && mkdir -p \
          /data/anki \
          /data/ankifeeder \
