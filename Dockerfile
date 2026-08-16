@@ -127,7 +127,7 @@ RUN python3 -m venv /app/venv \
 
 COPY ankifeeder ./ankifeeder
 COPY bin ./bin
-COPY config.example.json config.multi.example.json config.json ./
+COPY config.json ./
 
 # ---------------------------------------------------------------------------
 # Runtime user, dirs, supervisor + entrypoint
