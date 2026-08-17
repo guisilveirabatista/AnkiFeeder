@@ -153,12 +153,15 @@ RUN if getent passwd ubuntu >/dev/null; then userdel -r ubuntu || userdel ubuntu
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY docker/watch.sh /usr/local/bin/ankifeeder-watch.sh
 COPY docker/xvnc.sh /usr/local/bin/xvnc.sh
-COPY docker/supervisord.conf /etc/supervisor/conf.d/ankifeeder.conf
+COPY docker/novnc.sh /usr/local/bin/novnc.sh
+# Install as the default supervisor config so `supervisorctl` finds the socket.
+COPY docker/supervisord.conf /etc/supervisor/supervisord.conf
 COPY docker/config/openbox-rc.xml /etc/xdg/openbox/rc.xml
 
-RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/ankifeeder-watch.sh /usr/local/bin/xvnc.sh \
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/ankifeeder-watch.sh \
+        /usr/local/bin/xvnc.sh /usr/local/bin/novnc.sh \
     && mkdir -p /etc/supervisor \
-    && chown app:app /etc/supervisor/conf.d/ankifeeder.conf
+    && chown app:app /etc/supervisor/supervisord.conf
 
 WORKDIR /home/app
 
@@ -167,4 +170,4 @@ EXPOSE 5900 6080 8765
 VOLUME ["/data/anki", "/data/ankifeeder", "/vault", "/home/app/.config/obsidian"]
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/ankifeeder.conf"]
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
