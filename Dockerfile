@@ -152,10 +152,11 @@ RUN if getent passwd ubuntu >/dev/null; then userdel -r ubuntu || userdel ubuntu
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY docker/watch.sh /usr/local/bin/ankifeeder-watch.sh
+COPY docker/xvnc.sh /usr/local/bin/xvnc.sh
 COPY docker/supervisord.conf /etc/supervisor/conf.d/ankifeeder.conf
 COPY docker/config/openbox-rc.xml /etc/xdg/openbox/rc.xml
 
-RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/ankifeeder-watch.sh \
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/ankifeeder-watch.sh /usr/local/bin/xvnc.sh \
     && mkdir -p /etc/supervisor \
     && chown app:app /etc/supervisor/conf.d/ankifeeder.conf
 
