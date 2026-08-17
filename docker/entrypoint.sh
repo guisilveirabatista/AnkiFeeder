@@ -35,6 +35,7 @@ mkdir -p \
   /tmp/.X11-unix \
   /var/log/supervisor \
   2>/dev/null || true
+chmod 1777 /tmp/.X11-unix 2>/dev/null || true
 
 # Ensure supervisor env placeholders always resolve (empty string is fine).
 export VNC_GEOMETRY="${VNC_GEOMETRY:-${RESOLUTION:-1920x1080}}"
@@ -209,7 +210,7 @@ if [[ -d "$ANKIFEEDER_CONFIG" ]]; then
 fi
 cp "$CONFIG_SRC" "$ANKIFEEDER_CONFIG"
 if [[ "$(id -u)" -eq 0 ]]; then
-  chown app:app "$ANKIFEEDER_CONFIG"
+  chown app:app "$ANKIFEEDER_CONFIG" || true
 fi
 log "Installed AnkiFeeder config $CONFIG_SRC → $ANKIFEEDER_CONFIG"
 
@@ -240,4 +241,9 @@ if [[ -z "${ANTHROPIC_API_KEY}${OPENAI_API_KEY}${GEMINI_API_KEY}" ]]; then
 fi
 
 log "Starting: $*"
+# Drop to app before supervisord so it does not have to setuid itself
+# (that path exits and Docker then restart-loops).
+if [[ "$(id -u)" -eq 0 ]]; then
+  exec setpriv --reuid=app --regid=app --init-groups -- "$@"
+fi
 exec "$@"
