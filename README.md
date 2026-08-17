@@ -249,3 +249,14 @@ produces three cards: `ephemeral`, `serendipity`, `gregarious`.
   that exhausted their attempts get picked up automatically — no restart needed.
 - **Anki not running / no API key?** You'll get a clear message; while watching,
   errors are logged and the watcher keeps going so it recovers once fixed.
+
+
+
+Useful commands:
+
+watch live: docker compose exec ankifeeder tail -f /var/log/supervisor/ankifeeder.log
+
+2. Read its log
+
+docker compose exec ankifeeder tail -50 /var/log/supervisor/ankifeeder.log
+docker compose exec ankifeeder tail -20 /var/log/supervisor/ankifeeder.err
