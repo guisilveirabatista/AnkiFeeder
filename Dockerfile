@@ -109,6 +109,11 @@ RUN set -eux; \
     chmod +x /tmp/Obsidian.AppImage; \
     cd /tmp && ./Obsidian.AppImage --appimage-extract; \
     mv /tmp/squashfs-root /opt/obsidian; \
+    # AppImage extract often leaves 700 dirs / non-exec bits; app must be able
+    # to traverse and run the bundled Electron binary.
+    chmod -R a+rX /opt/obsidian; \
+    chmod +x /opt/obsidian/obsidian; \
+    if [ -f /opt/obsidian/chrome-sandbox ]; then chmod 755 /opt/obsidian/chrome-sandbox; fi; \
     # Convenience launcher
     printf '%s\n' '#!/bin/sh' \
       'exec /opt/obsidian/obsidian --no-sandbox --disable-gpu "$@"' \
@@ -169,6 +174,15 @@ RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/ankifeeder-watch.sh \
         /usr/local/bin/anki.sh /usr/local/bin/obsidian.sh \
     && mkdir -p /etc/supervisor \
     && chown app:app /etc/supervisor/supervisord.conf
+
+# Anki 26 / Qt 6.5 xcb plugin: the generic "need libxcb-cursor0" fatal also
+# fires when sibling xcb libs are missing (xkbcommon-x11 is the usual one).
+# Separate RUN so the Anki/Obsidian download layers stay cached.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libxcb-cursor0 libxkbcommon-x11-0 \
+        libxcb-image0 libxcb-xinput0 libxcb-util1 libxcb-randr0 \
+    && rm -rf /var/lib/apt/lists/* \
+    && ldconfig
 
 WORKDIR /home/app
 
