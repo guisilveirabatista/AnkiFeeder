@@ -132,12 +132,14 @@ COPY config.json ./
 # ---------------------------------------------------------------------------
 # Runtime user, dirs, supervisor + entrypoint
 # ---------------------------------------------------------------------------
-# ubuntu:24.04 already ships a UID 1000 user named "ubuntu".
-RUN if id -u ubuntu >/dev/null 2>&1; then \
-      usermod -l app ubuntu && groupmod -n app ubuntu && usermod -d /home/app -m app; \
-    elif ! id -u app >/dev/null 2>&1; then \
-      useradd -m -u 1000 -s /bin/bash app; \
-    fi \
+# ubuntu:24.04 already ships UID/GID 1000 as "ubuntu". Recreate as "app".
+# Stay root so the entrypoint can chown named volumes; supervisord then
+# drops privileges to app.
+RUN if getent passwd ubuntu >/dev/null; then userdel -r ubuntu || userdel ubuntu; fi \
+    && if getent group ubuntu >/dev/null; then groupdel ubuntu || true; fi \
+    && if getent group 1000 >/dev/null; then groupmod -n app "$(getent group 1000 | cut -d: -f1)"; \
+       else groupadd -g 1000 app; fi \
+    && useradd -m -u 1000 -g app -s /bin/bash app \
     && mkdir -p \
          /data/anki \
          /data/ankifeeder \
@@ -156,7 +158,6 @@ RUN chmod +x /usr/local/bin/entrypoint.sh \
     && mkdir -p /etc/supervisor \
     && chown app:app /etc/supervisor/conf.d/ankifeeder.conf
 
-USER app
 WORKDIR /home/app
 
 EXPOSE 5900 6080 8765

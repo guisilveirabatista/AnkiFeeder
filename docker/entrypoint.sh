@@ -14,6 +14,18 @@ ANKIFEEDER_HOME="${ANKIFEEDER_HOME:-/app/ankifeeder}"
 RESOLUTION="${RESOLUTION:-1920x1080}"
 VNC_PASSWORD="${VNC_PASSWORD:-}"
 
+# Entrypoint runs as root; apps run as app via supervisord.
+export HOME="${HOME:-/home/app}"
+export USER="${USER:-app}"
+if [[ "$(id -u)" -eq 0 ]]; then
+  chown -R app:app \
+    /data/anki \
+    /data/ankifeeder \
+    /home/app \
+    /var/log/supervisor \
+    2>/dev/null || true
+fi
+
 mkdir -p \
   "$ANKI_BASE" \
   "$(dirname "$ANKIFEEDER_CONFIG")" \
@@ -110,9 +122,10 @@ mkdir -p "$OBSIDIAN_VAULT"
 
 # Sample vocab note used by the default AnkiFeeder config (only if empty vault).
 DEFAULT_NOTE="$OBSIDIAN_VAULT/Vocabulary.md"
-if [[ ! -f "$DEFAULT_NOTE" ]] && [[ -z "$(find "$OBSIDIAN_VAULT" -type f -name '*.md' 2>/dev/null | head -1)" ]]; then
+existing_md="$(find "$OBSIDIAN_VAULT" -type f -name '*.md' -print -quit 2>/dev/null || true)"
+if [[ ! -f "$DEFAULT_NOTE" && -z "$existing_md" ]]; then
   log "Seeding sample vault note at $DEFAULT_NOTE"
-  cat > "$DEFAULT_NOTE" <<'MD'
+  cat > "$DEFAULT_NOTE" <<'MD' || log "Warning: could not seed $DEFAULT_NOTE"
 # Vocabulary
 
 Add one word or phrase per line. AnkiFeeder turns each into an Anki card.
@@ -120,6 +133,9 @@ Add one word or phrase per line. AnkiFeeder turns each into an Anki card.
 - ephemeral
 - serendipity
 MD
+  if [[ "$(id -u)" -eq 0 ]]; then
+    chown app:app "$DEFAULT_NOTE" 2>/dev/null || true
+  fi
 fi
 
 # Obsidian vault registry + open-on-start
@@ -186,7 +202,15 @@ if [[ ! -f "$CONFIG_SRC" ]]; then
   log "Error: $CONFIG_SRC is missing; COPY config.json into the image"
   exit 1
 fi
+mkdir -p "$(dirname "$ANKIFEEDER_CONFIG")"
+if [[ -d "$ANKIFEEDER_CONFIG" ]]; then
+  log "Error: $ANKIFEEDER_CONFIG is a directory; remove it from the ankifeeder-data volume"
+  exit 1
+fi
 cp "$CONFIG_SRC" "$ANKIFEEDER_CONFIG"
+if [[ "$(id -u)" -eq 0 ]]; then
+  chown app:app "$ANKIFEEDER_CONFIG"
+fi
 log "Installed AnkiFeeder config $CONFIG_SRC → $ANKIFEEDER_CONFIG"
 
 # Export for child processes / supervisord programs

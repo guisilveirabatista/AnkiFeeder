@@ -43,8 +43,6 @@ services:
       - anki-data:/data/anki
       # Persist AnkiFeeder word state files (config.json is copied in on each start)
       - ankifeeder-data:/data/ankifeeder
-      # Live config: entrypoint copies this to /data/ankifeeder/config.json
-      - ./config.json:/app/ankifeeder/config.json:ro
       # Your Obsidian vault (mount a host folder to edit notes from outside)
       - ${OBSIDIAN_VAULT_HOST:-./vault}:/vault
       # Persist Obsidian app settings / account after GUI login
