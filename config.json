@@ -11,19 +11,19 @@
   "tag": "ankifeeder",
     "feeds": [
     {
-      "note_path": "~/Documents/guisilver/languages/dutch/Nederlands.md",
+      "note_path": "/vault/languages/dutch/Nederlands.md",
       "deck_name": "Nederlands",
       "source_language": "Dutch",
       "target_language": "English"
     },
     {
-      "note_path": "~/Documents/guisilver/languages/portuguese/Portugues.md",
+      "note_path": "/vault/languages/portuguese/Portugues.md",
       "deck_name": "Portugues",
       "source_language": "Portuguese",
       "target_language": "Portuguese"
     },
     {
-      "note_path": "~/Documents/guisilver/languages/english/English.md",
+      "note_path": "/vault/languages/english/English.md",
       "deck_name": "English",
       "source_language": "English",
       "target_language": "English"
