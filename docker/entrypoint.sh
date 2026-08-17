@@ -17,7 +17,12 @@ VNC_PASSWORD="${VNC_PASSWORD:-}"
 # Entrypoint runs as root; apps run as app via supervisord.
 export HOME="${HOME:-/home/app}"
 export USER="${USER:-app}"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/1000}"
+export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR}/bus}"
 if [[ "$(id -u)" -eq 0 ]]; then
+  mkdir -p "$XDG_RUNTIME_DIR"
+  chown app:app "$XDG_RUNTIME_DIR"
+  chmod 700 "$XDG_RUNTIME_DIR"
   chown -R app:app \
     /data/anki \
     /data/ankifeeder \

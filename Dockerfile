@@ -140,6 +140,7 @@ RUN if getent passwd ubuntu >/dev/null; then userdel -r ubuntu || userdel ubuntu
     && if getent group 1000 >/dev/null; then groupmod -n app "$(getent group 1000 | cut -d: -f1)"; \
        else groupadd -g 1000 app; fi \
     && useradd -m -u 1000 -g app -s /bin/bash app \
+    && for g in audio video render; do getent group "$g" >/dev/null && usermod -aG "$g" app || true; done \
     && mkdir -p \
          /data/anki \
          /data/ankifeeder \
@@ -148,18 +149,24 @@ RUN if getent passwd ubuntu >/dev/null; then userdel -r ubuntu || userdel ubuntu
          /home/app/.vnc \
          /var/log/supervisor \
          /var/run \
-    && chown -R app:app /app /data /vault /home/app /var/log/supervisor
+         /run/user/1000 \
+    && chown -R app:app /app /data /vault /home/app /var/log/supervisor /run/user/1000 \
+    && chmod 700 /run/user/1000
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY docker/watch.sh /usr/local/bin/ankifeeder-watch.sh
 COPY docker/xvnc.sh /usr/local/bin/xvnc.sh
 COPY docker/novnc.sh /usr/local/bin/novnc.sh
+COPY docker/desktop-env.sh /usr/local/bin/desktop-env.sh
+COPY docker/anki.sh /usr/local/bin/anki.sh
+COPY docker/obsidian.sh /usr/local/bin/obsidian.sh
 # Install as the default supervisor config so `supervisorctl` finds the socket.
 COPY docker/supervisord.conf /etc/supervisor/supervisord.conf
 COPY docker/config/openbox-rc.xml /etc/xdg/openbox/rc.xml
 
 RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/ankifeeder-watch.sh \
         /usr/local/bin/xvnc.sh /usr/local/bin/novnc.sh \
+        /usr/local/bin/anki.sh /usr/local/bin/obsidian.sh \
     && mkdir -p /etc/supervisor \
     && chown app:app /etc/supervisor/supervisord.conf
 
